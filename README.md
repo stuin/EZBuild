@@ -23,6 +23,6 @@ buildargs|basic	|added to end of build command						|
 linker	|none	|second build command run							|output
 linkargs|basic	|added to end of link command						|
 terminal|none	|emulator command used for -e 						|
-test 	|none	|command used with -r 								|output
+tester 	|none	|command used with -r 								|output
 testargs|basic	|added to end of test command 						|
 parent  |none	|provides additional config file to check			|

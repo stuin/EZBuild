@@ -55,10 +55,10 @@ grab() {
 # Parse command arguments
 while getopts ":epra:" options; do
     case "${options}" in
-    e )
-        EMULATOR="-e"
-        ;;
-    p )
+	e )
+		EMULATOR="-e"
+		;;
+	p )
 		PAUSE="-p"
 		;;
 	r )
@@ -68,7 +68,7 @@ while getopts ":epra:" options; do
 		EXTRA=$OPTARG
 		;;
 	\?)
-	    ;;
+		;;
     esac
 done
 
@@ -83,7 +83,8 @@ fi
 
 if [ -n "$RUN" ]; then
 	# Just test latest build
-	$(grab output) $EXTRA $(grab testargs)
+	runcmd=$(echo $(grab tester) | sed "s:output:$(grab output):")
+	$runcmd $EXTRA $(grab testargs)
 else
 	# Retrieve config for actual build
 	files=$(grab files 2)
@@ -92,12 +93,12 @@ else
 	linkargs=$(grab linkargs 1)
 
 	# Builder
-	buildcmd=$(echo $(grab builder) | sed "s:files:$files: ; s:buildargs:$buildargs:")
+	buildcmd=$(echo $(grab builder) | sed "s:files:$files: ; s:output:$output:")
 	echo $buildcmd
 	$buildcmd
 
 	# Linker
-	linkcmd=$(echo $(grab linker) | sed "s:output:$output: ; s:linkargs:$linkargs:")
+	linkcmd=$(echo $(grab linker) | sed "s:output:$output:")
 	#echo $linkcmd
 	$linkcmd
 
