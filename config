@@ -1,11 +1,12 @@
 files=*.cpp
 output=/tmp/a.out
+terminal=kitty
 
-builder=g++ -c files -std=c++17 -Wall -fpermissive buildargs
+builder=g++ -c files -std=c++17 -Wall -fpermissive
 buildargs=""
 
-linker=g++ *.o -o output -pthread linkargs
+linker=g++ *.o -o output -pthread
 linkargs=""
 
-terminal=kitty 
+tester=output
 testargs=""
