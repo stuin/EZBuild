@@ -1,0 +1,114 @@
+# Starting config locations
+BASE=.includes
+GLOBAL=/etc/ezbuild
+
+EMULATOR=""
+PAUSE=""
+RUN=""
+EXTRA=""
+
+# Retrieve variable from recursive config files
+grab() {
+	out=""
+	file=$BASE
+	dir=""
+
+	if [ -n "$2" ] && [ "$2" == "2" ]; then
+		dir="true"
+	fi
+
+	# If no local config provided
+	if [ ! -r "$file" ]; then
+		file=$GLOBAL
+		dir=""
+	fi
+
+	while [ -r "$file" ]; do
+		out=$(sed -n "s:$1=::p" $file)
+
+		# Return config option
+		if [ -n "$out" ]; then
+			if [ -n "$dir" ]; then
+				# Use current config file directory
+				dir="$(dirname $file)/"
+				echo "$dir$out" | sed "s: : $dir:g ; s:\"\"::" | tr '\n' ' '
+			else
+				echo "$out" | sed 's:""::' | tr '\n' ' '
+			fi
+		fi
+
+		# Locate next config file if needed
+		if [ "$file" != "$GLOBAL" ] && ( [ -z "$out" ] || [ -n "$2" ] ); then
+			file=$(sed -n 's:parent=::p' $file)
+
+			if [ -z "$file" ] && ( [ -z "$dir" ] || [ "$dir" == "true" ] ) ; then
+				file=$GLOBAL
+				dir=""
+			fi
+		else
+			file=""
+		fi
+	done
+	echo ""
+}
+
+# Parse command arguments
+while getopts ":epra:" options; do
+    case "${options}" in
+    e )
+        EMULATOR="-e"
+        ;;
+    p )
+		PAUSE="-p"
+		;;
+	r )
+		RUN="-r"
+		;;
+	a )
+		EXTRA=$OPTARG
+		;;
+	\?)
+	    ;;
+    esac
+done
+
+shift $((OPTIND -1))
+EXTRA="$EXTRA $@"
+
+# Redirect command to new window
+if [ -n "$EMULATOR" ]; then
+	$(grab terminal) ezbuild $PAUSE $RUN $EXTRA
+	exit 0
+fi
+
+if [ -n "$RUN" ]; then
+	# Just test latest build
+	$(grab output) $EXTRA $(grab testargs)
+else
+	# Retrieve config for actual build
+	files=$(grab files 2)
+	output=$(grab output)
+	buildargs=$(grab buildargs 1)
+	linkargs=$(grab linkargs 1)
+
+	# Builder
+	buildcmd=$(echo $(grab builder) | sed "s:files:$files: ; s:buildargs:$buildargs:")
+	echo $buildcmd
+	$buildcmd
+
+	# Linker
+	linkcmd=$(echo $(grab linker) | sed "s:output:$output: ; s:linkargs:$linkargs:")
+	#echo $linkcmd
+	$linkcmd
+
+	chmod +x $output
+
+	# Cleaner
+	rm *.o
+fi
+
+# Pause at end
+if [ -n "$PAUSE" ]; then
+	echo "Press enter to continue "
+	read
+fi
