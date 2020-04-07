@@ -1,6 +1,6 @@
 files=*.cpp
 output=/tmp/a.out
-terminal=kitty
+terminal=xterm
 
 builder=g++ -c files -std=c++17 -Wall -fpermissive
 buildargs=""

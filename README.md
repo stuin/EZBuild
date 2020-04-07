@@ -14,15 +14,20 @@ Some options will merge the local value and all parent values into a single vara
 The global value will not be included when merging.
 The files option will the relevant directory path to every token when merging.
 
-Option	|Merging|Desc												|Vars
------	|-----	|-----												|-----
+Option	|Merging|Desc							|Vars
+-----	|-----	|-----							|-----
 files	|path	|lists all files passed to the build command		|
 output	|none	|sets the output file given to the other commands	|
-builder	|none	|first build command run							|files, output
-buildargs|basic	|added to end of build command						|
-linker	|none	|second build command run							|output
-linkargs|basic	|added to end of link command						|
-terminal|none	|emulator command used for -e 						|
-tester 	|none	|command used with -r 								|output
-testargs|basic	|added to end of test command 						|
-parent  |none	|provides additional config file to check			|
+builder	|none	|first build command run				|files, output
+buildargs|basic	|added to end of build command				|
+linker	|none	|second build command run				|output
+linkargs|basic	|added to end of link command				|
+terminal|none	|emulator command used for -e 				|
+tester 	|none	|command used with -r 					|output
+testargs|basic	|added to end of test command 				|
+parent  |none	|provides additional config file to check		|
+
+# Install
+First edit the included config file to match your personal system and use case.
+Then run the install script.
+sudo ./install.sh
