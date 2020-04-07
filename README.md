@@ -30,4 +30,6 @@ parent  |none	|provides additional config file to check		|
 # Install
 First edit the included config file to match your personal system and use case.
 Then run the install script.
+```
 sudo ./install.sh
+```
