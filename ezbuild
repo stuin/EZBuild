@@ -55,10 +55,10 @@ grab() {
 # Parse command arguments
 while getopts ":epra:" options; do
     case "${options}" in
-	e )
-		EMULATOR="-e"
-		;;
-	p )
+    e )
+        EMULATOR="-e"
+        ;;
+    p )
 		PAUSE="-p"
 		;;
 	r )
@@ -68,7 +68,7 @@ while getopts ":epra:" options; do
 		EXTRA=$OPTARG
 		;;
 	\?)
-		;;
+	    ;;
     esac
 done
 
