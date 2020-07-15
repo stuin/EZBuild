@@ -96,13 +96,13 @@ else
 
 	# Builder
 	buildcmd=$(echo $(grab builder) | sed "s:files:$files: ; s:output:$output:")
-	echo $buildcmd
-	$buildcmd
+	echo "$buildcmd$buildargs"
+	$buildcmd $buildargs
 
 	# Linker
 	linkcmd=$(echo $(grab linker) | sed "s:output:$output:")
-	#echo $linkcmd
-	$linkcmd
+	#echo "$linkcmd$linkargs"
+	$linkcmd $linkargs
 
 	chmod +x $output
 
