@@ -10,3 +10,4 @@ linkargs=""
 
 tester=output
 testargs=""
+testdir=./

@@ -84,6 +84,8 @@ fi
 if [ -n "$RUN" ]; then
 	# Just test latest build
 	runcmd=$(echo $(grab tester) | sed "s:output:$(grab output):")
+	rundir=$(grab testdir)
+	cd $rundir
 	$runcmd $EXTRA $(grab testargs)
 else
 	# Retrieve config for actual build
