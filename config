@@ -1,5 +1,5 @@
 files=*.cpp
-output=/tmp/a.out
+output=a.out
 terminal=xterm
 
 builder=g++ -c files -std=c++17 -Wall -fpermissive
@@ -11,3 +11,5 @@ linkargs=""
 tester=output
 testargs=""
 testdir=./
+
+cleaner=rm *.o

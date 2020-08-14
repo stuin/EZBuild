@@ -93,6 +93,7 @@ else
 	output=$(grab output)
 	buildargs=$(grab buildargs 1)
 	linkargs=$(grab linkargs 1)
+	cleaner=$(grab cleaner)
 
 	# Builder
 	buildcmd=$(echo $(grab builder) | sed "s:files:$files: ; s:output:$output:")
@@ -107,7 +108,7 @@ else
 	chmod +x $output
 
 	# Cleaner
-	rm *.o
+	$cleaner
 fi
 
 # Pause at end
