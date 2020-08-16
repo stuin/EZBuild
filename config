@@ -1,15 +1,17 @@
 files=*.cpp
 output=a.out
 terminal=xterm
+num=2
 
-builder=g++ -c files -std=c++17 -Wall -fpermissive
-buildargs=""
+caching=s/.cpp/.o/g ; s: [^/ ]*/: :g
+depfinder=s:#include \"::pg
 
-linker=g++ *.o -o output -pthread
-linkargs=""
+builder1=g++ -c %files -std=c++17 -Wall -fpermissive
+buildargs1=""
 
-tester=output
+builder2=g++ %cached -o %output -pthread
+buildargs2=""
+
+tester=%output
 testargs=""
 testdir=./
-
-cleaner=rm *.o

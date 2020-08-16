@@ -3,7 +3,7 @@ manprefix=$prefix/share/man/man1
 version=1.1
 
 mkdir -p $prefix/bin
-install -m 755 ezbuild $prefix/bin
+install -m 755 ezbuild.sh $prefix/bin/ezbuild
 
 if [ ! -r "/etc/ezbuild" ]; then
 	install -m 644 config /etc/ezbuild
