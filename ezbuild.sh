@@ -115,7 +115,7 @@ if [ -n "$TEST" ]; then
 	runcmd=$(echo $(grab tester) | sed "s:%output:$(grab output):")
 	rundir=$(grab testdir)
 	cd $rundir
-	$runcmd $EXTRA $(grab testargs)
+	$runcmd $EXTRA $(grab testargs 1)
 else
 	# Retrieve config for actual build
 	files=$(echo " $(echo $(grab files 2))" | sed "s: ./: :g")
