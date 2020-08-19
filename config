@@ -1,3 +1,4 @@
+cd=./
 files=*.cpp
 output=a.out
 terminal=xterm

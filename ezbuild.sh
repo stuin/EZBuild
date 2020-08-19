@@ -5,6 +5,7 @@ GLOBAL=/etc/ezbuild
 EMULATOR=""
 PAUSE=""
 TEST=""
+CACHED=""
 EXTRA=""
 
 # Retrieve variable from recursive config files
@@ -82,7 +83,7 @@ headers() {
 }
 
 # Parse command arguments
-while getopts ":epra:" options; do
+while getopts ":eprca:" options; do
     case "${options}" in
     e )
         EMULATOR="-e"
@@ -90,8 +91,11 @@ while getopts ":epra:" options; do
     p )
 		PAUSE="-p"
 		;;
-	t )
-		TEST="-t"
+	r )
+		TEST="-r"
+		;;
+	c )
+		CACHED="-c"
 		;;
 	a )
 		EXTRA=$OPTARG
@@ -106,16 +110,18 @@ EXTRA="$EXTRA $@"
 
 # Redirect command to new window
 if [ -n "$EMULATOR" ]; then
-	$(grab terminal) ezbuild $PAUSE $TEST $EXTRA
+	$(grab terminal) ezbuild $PAUSE $TEST $CACHED $EXTRA
 	exit 0
 fi
+
+cd $(grab cd)
 
 if [ -n "$TEST" ]; then
 	# Run latest build
 	runcmd=$(echo $(grab tester) | sed "s:%output:$(grab output):")
 	rundir=$(grab testdir)
 	cd $rundir
-	$runcmd $EXTRA $(grab testargs 1)
+	$runcmd $EXTRA $(grab testargs)
 else
 	# Retrieve config for actual build
 	files=$(echo " $(echo $(grab files 2))" | sed "s: ./: :g")
@@ -127,22 +133,24 @@ else
 	cached=$(echo $files | sed "$caching")
 	depfinder=$(grab depfinder)
 
-	# Remove cached items from file list
-	if [ -n "$caching" ]; then
-		IFS=' '
-		for val in $files; do
-			cacheval=$(echo " $val" | sed "$caching ; s:^ ::")
-			# If source or header files newer than cache
-			if [ -e "$cacheval" -a "$val" -ot "$cacheval" ]; then
-				echo "Checking headers for $val"
-				h=$(headers "$depfinder" "$cacheval" "$val")
-				if [ -z "$h" ]; then
-					files=$(echo $files | sed "s:$val::g")
-				else
-					echo $h
+	if [ -n "$CACHED" ]; then
+		# Remove cached items from file list
+		if [ -n "$caching" ]; then
+			IFS=' '
+			for val in $files; do
+				cacheval=$(echo " $val" | sed "$caching ; s:^ ::")
+				# If source or header files newer than cache
+				if [ -e "$cacheval" -a "$val" -ot "$cacheval" ]; then
+					echo "Checking headers for $val"
+					h=$(headers "$depfinder" "$cacheval" "$val")
+					if [ -z "$h" ]; then
+						files=$(echo $files | sed "s:$val::g")
+					else
+						echo $h
+					fi
 				fi
-			fi
-		done
+			done
+		fi
 	fi
 
 	# Check if all files in cache

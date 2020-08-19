@@ -20,6 +20,7 @@ build commands without a number will be counted as build1.
 
 Option	|Merging|Desc							|Vars
 -----	|-----	|-----							|-----
+cd 		|none	|move to directory and use its config 		|
 files	|path	|lists all files passed to the build command		|
 output	|none	|sets the output file given to the other commands	|
 num		|none	|number of build commands to run			|
