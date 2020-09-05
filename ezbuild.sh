@@ -7,6 +7,7 @@ PAUSE=""
 TEST=""
 CACHED=""
 EXTRA=""
+NUMBER=""
 
 # Retrieve variable from recursive config files
 grab() {
@@ -83,7 +84,7 @@ headers() {
 }
 
 # Parse command arguments
-while getopts ":eprca:" options; do
+while getopts ":eprca:n:" options; do
     case "${options}" in
     e )
         EMULATOR="-e"
@@ -100,6 +101,9 @@ while getopts ":eprca:" options; do
 	a )
 		EXTRA=$OPTARG
 		;;
+	n )
+		NUMBER=$OPTARG
+		;;
 	\?)
 	    ;;
     esac
@@ -110,7 +114,11 @@ EXTRA="$EXTRA $@"
 
 # Redirect command to new window
 if [ -n "$EMULATOR" ]; then
-	$(grab terminal) ezbuild $PAUSE $TEST $CACHED $EXTRA
+	if [ -n "$NUMBER" ]; then
+		$(grab terminal) ezbuild $PAUSE $TEST $CACHED -n $NUMBER $EXTRA
+	else
+		$(grab terminal) ezbuild $PAUSE $TEST $CACHED $EXTRA
+	fi
 	exit 0
 fi
 
@@ -156,10 +164,17 @@ else
 	# Check if all files in cache
 	echo ""
 	if [ -z "$files" -a -n "$cached" ]; then
-		echo "No files changed"
-	else
-		# Run build commands 1 through num
-		for ((i=1; i <= $num; i++)); do
+		if [ -e $output ]; then
+			echo "No files changed"
+			num="0"
+		else
+			echo "No output file"
+		fi
+	fi
+
+	# Run build commands 1 through num
+	for ((i=1; i <= $num; i++)); do
+		if [ -z "$NUMBER" -o "$i" == "$NUMBER" ]; then
 
 			# Retrive numbered command
 			buildcmd=$(grab builder$i)
@@ -175,8 +190,8 @@ else
 			buildcmd=$(echo $buildcmd | sed "s:%files:$files: ; s:%cached:$cached: ; s:%output:$output:")
 			echo "$buildcmd$buildargs"
 			$buildcmd $buildargs
-		done
-	fi
+		fi
+	done
 
 	chmod +x $output
 fi
