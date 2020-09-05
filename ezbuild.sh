@@ -124,13 +124,13 @@ if [ -n "$TEST" ]; then
 	$runcmd $EXTRA $(grab testargs)
 else
 	# Retrieve config for actual build
-	files=$(echo " $(echo $(grab files 2))" | sed "s: ./: :g")
+	files=$(echo " $(echo $(grab files 2))")
 	output=$(grab output)
 	num=$(grab num)
 
 	# Run caching reg on files
 	caching=$(grab caching)
-	cached=$(echo $files | sed "$caching")
+	cached=$(echo " $files" | sed "$caching")
 	depfinder=$(grab depfinder)
 
 	if [ -n "$CACHED" ]; then
