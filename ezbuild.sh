@@ -84,7 +84,7 @@ headers() {
 }
 
 # Parse command arguments
-while getopts ":eprca:n:" options; do
+while getopts ":eprca:n:f:" options; do
     case "${options}" in
     e )
         EMULATOR="-e"
@@ -104,6 +104,14 @@ while getopts ":eprca:n:" options; do
 	n )
 		NUMBER=$OPTARG
 		;;
+	f )
+		if [ -e "$BASE" ]; then
+			BASE=$OPTARG
+		else
+			echo "Selected config file not found"
+			exit 1
+		fi
+		;;
 	\?)
 	    ;;
     esac
@@ -111,6 +119,16 @@ done
 
 shift $((OPTIND -1))
 EXTRA="$EXTRA $@"
+
+# Find config in parent
+if [ ! -e "$BASE" ]; then
+	if [ -e "../$BASE" ]; then
+		echo "Using parent dir config"
+		cd ../
+	else
+		echo "Using global config"
+	fi
+fi
 
 # Redirect command to new window
 if [ -n "$EMULATOR" ]; then
@@ -127,9 +145,11 @@ cd $(grab cd)
 if [ -n "$TEST" ]; then
 	# Run latest build
 	runcmd=$(echo $(grab tester) | sed "s:%output:$(grab output):")
+	runargs=$(grab testargs)
 	rundir=$(grab testdir)
 	cd $rundir
-	$runcmd $EXTRA $(grab testargs)
+	echo "$runcmd $EXTRA $runargs"
+	$runcmd $EXTRA $runargs
 else
 	# Retrieve config for actual build
 	files=$(echo " $(echo $(grab files 2))")
@@ -166,7 +186,7 @@ else
 	if [ -z "$files" -a -n "$cached" ]; then
 		if [ -e $output ]; then
 			echo "No files changed"
-			num="0"
+			exit 2
 		else
 			echo "No output file"
 		fi
