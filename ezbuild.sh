@@ -8,6 +8,8 @@ TEST=""
 CACHED=""
 EXTRA=""
 NUMBER=""
+OPEN=""
+FILE=""
 
 # Retrieve variable from recursive config files
 grab() {
@@ -84,34 +86,30 @@ headers() {
 }
 
 # Parse command arguments
-while getopts ":eprca:n:f:" options; do
+while getopts ":eprca:n:o:f:" options; do
     case "${options}" in
     e )
-        EMULATOR="-e"
-        ;;
+        EMULATOR="-e";;
     p )
-		PAUSE="-p"
-		;;
+		PAUSE="-p";;
 	r )
-		TEST="-r"
-		;;
+		TEST="-r";;
 	c )
-		CACHED="-c"
-		;;
+		CACHED="-c";;
 	a )
-		EXTRA=$OPTARG
-		;;
+		EXTRA=$OPTARG;;
 	n )
-		NUMBER=$OPTARG
-		;;
+		NUMBER=$OPTARG;;
+	o )
+		OPEN=$OPTARG;;
 	f )
 		if [ -e "$BASE" ]; then
 			BASE=$OPTARG
+			FILE="-f"
 		else
 			echo "Selected config file not found"
 			exit 1
-		fi
-		;;
+		fi;;
 	\?)
 	    ;;
     esac
@@ -120,7 +118,12 @@ done
 shift $((OPTIND -1))
 EXTRA="$EXTRA $@"
 
-# Find config in parent
+# Test for open config file
+if [ -z "$FILE" ] && echo "$OPEN" | grep -q -E '*includes$'; then
+	BASE=$OPEN
+fi
+
+# Check for config in parent dir
 if [ ! -e "$BASE" ]; then
 	if [ -e "../$BASE" ]; then
 		echo "Using parent dir config"
@@ -133,19 +136,25 @@ fi
 # Redirect command to new window
 if [ -n "$EMULATOR" ]; then
 	if [ -n "$NUMBER" ]; then
-		$(grab terminal) ezbuild $PAUSE $TEST $CACHED -n $NUMBER $EXTRA
-	else
-		$(grab terminal) ezbuild $PAUSE $TEST $CACHED $EXTRA
+		NUMBER="-n $NUMBER"
 	fi
+	if [ -n "$OPEN" ]; then
+		OPEN="-o $OPEN"
+	fi
+	FILE="-f $BASE"
+
+	$(grab terminal) ezbuild $PAUSE $TEST $CACHED $NUMBER $OPEN $FILE $EXTRA
 	exit 0
 fi
 
 cd $(grab cd)
+caching=$(grab caching)
+OPENC=$(echo " $OPEN" | sed "$caching")
 
 if [ -n "$TEST" ]; then
 	# Run latest build
-	runcmd=$(echo $(grab tester) | sed "s:%output:$(grab output):")
-	runargs=$(grab testargs)
+	runcmd=$(echo $(grab tester) | sed "s:%output:$(grab output): ; s:%openc:$OPENC: ; s:%open:$OPEN:")
+	runargs=$(grab testargs 1)
 	rundir=$(grab testdir)
 	cd $rundir
 	echo "$runcmd $EXTRA $runargs"
@@ -156,23 +165,23 @@ else
 	output=$(grab output)
 	num=$(grab num)
 
-	# Run caching reg on files
-	caching=$(grab caching)
+	# Run caching regex on files
 	cached=$(echo " $files" | sed "$caching")
 	depfinder=$(grab depfinder)
+	filesc=$files
 
+	# Remove cached items from file list
 	if [ -n "$CACHED" ]; then
-		# Remove cached items from file list
 		if [ -n "$caching" ]; then
 			IFS=' '
-			for val in $files; do
+			for val in $filesc; do
 				cacheval=$(echo " $val" | sed "$caching ; s:^ ::")
 				# If source or header files newer than cache
 				if [ -e "$cacheval" -a "$val" -ot "$cacheval" ]; then
 					echo "Checking headers for $val"
 					h=$(headers "$depfinder" "$cacheval" "$val")
 					if [ -z "$h" ]; then
-						files=$(echo $files | sed "s:$val::g")
+						filesc=$(echo $filesc | sed "s:$val::g")
 					else
 						echo $h
 					fi
@@ -181,9 +190,9 @@ else
 		fi
 	fi
 
-	# Check if all files in cache
+	# Check if all files are in cache
 	echo ""
-	if [ -z "$files" -a -n "$cached" ]; then
+	if [ -z "$filesc" -a -n "$cached" ]; then
 		if [ -e $output ]; then
 			echo "No files changed"
 			exit 2
@@ -207,13 +216,11 @@ else
 			fi
 
 			# Run command with substitutions
-			buildcmd=$(echo $buildcmd | sed "s:%files:$files: ; s:%cached:$cached: ; s:%output:$output:")
+			buildcmd=$(echo $buildcmd | sed "s:%ncfiles:$filesc: ; s:%files:$files: ; s:%cached:$cached: ; s:%output:$output: ; s:%openc:$OPENC: ; s:%open:$OPEN:")
 			echo "$buildcmd$buildargs"
 			$buildcmd $buildargs
 		fi
 	done
-
-	chmod +x $output
 fi
 
 # Pause at end

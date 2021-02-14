@@ -18,18 +18,18 @@ The files option will include the relevant directory path to every token when me
 Multiple build commands can be used, and the script will run through from 1-num.
 build commands without a number will be counted as build1.
 
-Option	|Merging|Desc							|Vars
------	|-----	|-----							|-----
+Option	|Merging|Desc									 	|Vars
+-----	|-----	|-----							  			|-----
 cd 		|none	|move to directory and use its config 		|
 files	|path	|lists all files passed to the build command		|
 output	|none	|sets the output file given to the other commands	|
 num		|none	|number of build commands to run			|
-builder\#	|none	|build command run						|%files, %cached, %output
+builder\#	|none	|build command run						|%files, %ncfiles, %cached, %output, %open, %openc
 buildargs\#	|basic	|added to end of build command			|
 caching |none	|sed regex to convert src file paths to cached versions 	|
 depfinder|none	|sed -n regex for locating the dependencies of a src file 	|
 terminal|none	|emulator command used for -e 				|
-tester 	|none	|command used with -r 						|%output
+tester 	|none	|command used with -r 						|%output, %open, %openc
 testargs|basic	|added to end of test command 				|
 testdir	|basic	|directory to run test from 				|
 parent  |none	|provides additional config file to check	|
