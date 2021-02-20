@@ -161,6 +161,7 @@ if [ -n "$TEST" ]; then
 	$runcmd $EXTRA $runargs
 else
 	# Retrieve config for actual build
+	shopt -s extglob
 	files=$(echo " $(echo $(grab files 2))")
 	output=$(grab output)
 	num=$(grab num)
