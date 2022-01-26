@@ -38,13 +38,13 @@ grab() {
 				echo "$dir$out" | sed "s: : $dir:g ; s:\"\"::g" | tr '\n' ' '
 			else
 				# Just append option
-				echo "$out" | sed 's:""::' | tr '\n' ' '
+				echo "$out" | sed "s:\"\"::" | tr '\n' ' '
 			fi
 		fi
 
 		# Locate next config file if needed
 		if [ "$file" != "$GLOBAL" ] && ( [ -z "$out" ] || [ -n "$2" ] ); then
-			file=$(sed -n 's:parent=::p' $file)
+			file=$(sed -n "s:parent=::p" $file)
 
 			# Fallback to global file
 			if [ -z "$file" ] && ( [ -z "$dir" ] || [ "$dir" == "true" ] ) ; then
@@ -161,7 +161,7 @@ if [ -n "$TEST" ]; then
 	$runcmd $EXTRA $runargs
 else
 	# Retrieve config for actual build
-	shopt -s extglob
+	#shopt -s extglob
 	files=$(echo " $(echo $(grab files 2))")
 	output=$(grab output)
 	num=$(grab num)
@@ -170,6 +170,8 @@ else
 	cached=$(echo " $files" | sed "$caching")
 	depfinder=$(grab depfinder)
 	filesc=$files
+
+	echo "$(grab files 2) ; $caching ; $cached"
 
 	# Remove cached items from file list
 	if [ -n "$CACHED" ]; then
@@ -193,7 +195,7 @@ else
 
 	# Check if all files are in cache
 	echo ""
-	if [ -z "$filesc" -a -n "$cached" ]; then
+	if [ -z "$filesc" ] && [ -n "$cached" ]; then
 		if [ -e $output ]; then
 			echo "No files changed"
 			exit 2
@@ -203,7 +205,7 @@ else
 	fi
 
 	# Run build commands 1 through num
-	for ((i=1; i <= $num; i++)); do
+	for (( i=1; i<=$num; i++ )); do
 		if [ -z "$NUMBER" -o "$i" == "$NUMBER" ]; then
 
 			# Retrive numbered command
@@ -217,7 +219,7 @@ else
 			fi
 
 			# Run command with substitutions
-			buildcmd=$(echo $buildcmd | sed "s:%ncfiles:$filesc: ; s:%files:$files: ; s:%cached:$cached: ; s:%output:$output: ; s:%openc:$OPENC: ; s:%open:$OPEN:")
+			buildcmd=$(echo $buildcmd | sed "s:%ncfiles:$filesc: ; s:%files:$files: ; s:%cached:$cached: ; s:%output:$output: ; s:%openc:$OPENC:g ; s:%open:$OPEN:g")
 			echo "$buildcmd$buildargs"
 			$buildcmd $buildargs
 		fi
