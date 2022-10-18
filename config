@@ -5,7 +5,7 @@ terminal=xterm
 num=3
 
 caching=s/.cpp/.o/g ; s: [^ ]*/: ../obj/:g
-depfinder=s:#include \":../obj/:pg
+depfinder=s:#include \"::pg
 
 builder1=g++ -c %ncfiles -std=c++17 -Wall -fpermissive
 buildargs1=""
