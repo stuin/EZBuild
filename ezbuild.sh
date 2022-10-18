@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Starting config locations
 BASE=.includes
 GLOBAL=/etc/ezbuild
@@ -190,17 +192,6 @@ else
 					fi
 				fi
 			done
-		fi
-	fi
-
-	# Check if all files are in cache
-	echo ""
-	if [ -z "$filesc" ] && [ -n "$cached" ]; then
-		if [ -e $output ]; then
-			echo "No files changed"
-			exit 2
-		else
-			echo "No output file"
 		fi
 	fi
 
