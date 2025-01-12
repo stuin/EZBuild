@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Starting config locations
 BASE=.includes
 GLOBAL=/etc/ezbuild
@@ -63,21 +65,25 @@ headers() {
 	cachefile=$2
 	file=$3
 	checked=$4
-	found=""
 
 	# Get relevant files and relative location
 	dir=$(dirname $file)
 	list=$(echo $(cat $file | sed -n "$depfinder")
 
-	# If a header file is newer than cache
+	# Search linked header files
 	for val in $list; do
 		if [ -e "$dir/$val" ]; then
 			if [[ "$checked" != *"$dir/$val"* ]]; then
+				# Recursive search
 				h=$(headers "$depfinder" "$cachefile" "$dir/$val" "$checked")
 				checked="$checked $h $dir/$val"
-				if [ "$dir/$val" -nt "$cachefile" -o -n "$h" ]; then
+				if [ -n "$h" ]; then
+					echo -n "$h"
+				fi
+
+				# Check if header is newer
+				if [ "$dir/$val" -nt "$cachefile" ]; then
 					echo -n "$dir/$val "
-					found="true"
 				fi
 			fi
 		fi
@@ -119,7 +125,7 @@ shift $((OPTIND -1))
 EXTRA="$EXTRA $@"
 
 # Test for open config file
-if [ -z "$FILE" ] && echo "$OPEN" | grep -q -E '*includes$'; then
+if [ -z "$FILE" ] && echo "$OPEN" | grep -q -E '\.*includes$'; then
 	BASE=$OPEN
 fi
 
@@ -171,7 +177,7 @@ else
 	depfinder=$(grab depfinder)
 	filesc=$files
 
-	echo "$(grab files 2) ; $caching ; $cached"
+	echo "$files"
 
 	# Remove cached items from file list
 	if [ -n "$CACHED" ]; then
@@ -193,16 +199,7 @@ else
 		fi
 	fi
 
-	# Check if all files are in cache
 	echo ""
-	if [ -z "$filesc" ] && [ -n "$cached" ]; then
-		if [ -e $output ]; then
-			echo "No files changed"
-			exit 2
-		else
-			echo "No output file"
-		fi
-	fi
 
 	# Run build commands 1 through num
 	for (( i=1; i<=$num; i++ )); do
