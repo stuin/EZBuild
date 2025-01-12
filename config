@@ -5,15 +5,15 @@ terminal=xterm
 num=3
 
 caching=s/.cpp/.o/g ; s: [^ ]*/: ../obj/:g
-depfinder=s:#include \":../obj/:pg
+depfinder=s:#include \"\(.*\)\"$:\1:pg
 
-builder1=g++ -c %ncfiles -std=c++17 -Wall -fpermissive
+builder1=g++ -c %ncfiles -std=c++17 -Wall -fpermissive -O3 -g -D_DEBUG
 buildargs1=""
 
 builder2=mv *.o ../obj/
 buildargs2=""
 
-builder3=g++ %cached -o %output -pthread
+builder3=g++ %cached -o %output -pthread -O3 -g
 buildargs3=""
 
 tester=%output

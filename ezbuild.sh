@@ -67,7 +67,7 @@ headers() {
 
 	# Get relevant files and relative location
 	dir=$(dirname $file)
-	list=$(echo $(cat $file | sed -n "$depfinder" | sed -z "s:\"\\n: :g"))
+	list=$(echo $(cat $file | sed -n "$depfinder")
 
 	# If a header file is newer than cache
 	for val in $list; do
