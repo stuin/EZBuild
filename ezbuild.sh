@@ -68,7 +68,7 @@ headers() {
 
 	# Get relevant files and relative location
 	dir=$(dirname $file)
-	list=$(echo $(cat $file | sed -n "$depfinder")
+	list=$(echo $(cat $file | sed -n "$depfinder" | sed -z "s:\"\\n: :g"))
 
 	# Search linked header files
 	for val in $list; do
